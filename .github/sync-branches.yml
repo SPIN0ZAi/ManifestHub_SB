@@ -1,0 +1,32 @@
+name: sync-branches
+
+on:
+  workflow_dispatch: # allows you to run it manually
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout your repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "SPIN0ZAi"
+          git config --global user.email "ssolayman244@gmail.com"
+
+      - name: Add upstream (ManifestHub) remote
+        run: |
+          git remote add manifesthub https://github.com/SteamAutoCracks/ManifestHub.git
+          git fetch manifesthub
+
+      - name: Sync branches from ManifestHub
+        run: |
+          for branch in $(git ls-remote --heads manifesthub | cut -f2 | sed 's#refs/heads/##'); do
+            echo "Syncing $branch"
+            git checkout -B "$branch" "manifesthub/$branch"
+            git push origin "$branch" --force
+          done
